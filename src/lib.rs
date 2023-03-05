@@ -4,4 +4,4 @@ pub mod project;
 
 pub mod cli;
 
-pub use {::config::*, client::QueryClient, client::SigningClient, project::Project};
+pub use {client::QueryClient, client::SigningClient, config::*, project::Project};

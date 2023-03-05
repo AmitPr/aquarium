@@ -10,7 +10,7 @@ pub struct Cli {
 #[derive(Subcommand, Debug, Clone)]
 pub enum Commands {
     #[clap(name = "init", about = "Initialize a new project")]
-    Init{
+    Init {
         // #[arg(name = "name", long, short)]
         name: String,
         #[clap(name = "dir", long, short)]

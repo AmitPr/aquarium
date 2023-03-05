@@ -1,4 +1,4 @@
-use reqwest::{Client, Response};
+use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
 use anyhow::Result;
@@ -34,8 +34,7 @@ impl Network {
         let response = self
             .get("cosmos/base/tendermint/v1beta1/blocks/latest")
             .await?;
-        let res = self.get("blocks/latest").await?;
-        Ok(res["block"]["header"]["height"]
+        Ok(response["block"]["header"]["height"]
             .as_str()
             .ok_or(anyhow::anyhow!("Error parsing block height"))?
             .parse::<u32>()?)

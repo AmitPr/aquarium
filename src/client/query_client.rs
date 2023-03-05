@@ -32,11 +32,7 @@ impl QueryClient {
 
 #[async_trait]
 impl Querier for QueryClient {
-    async fn query<Req, Res>(
-        &self,
-        address: String,
-        message: &Req,
-    ) -> Result<Res>
+    async fn query<Req, Res>(&self, address: String, message: &Req) -> Result<Res>
     where
         Req: Serialize + ?Sized + Sync,
         Res: for<'de> serde::Deserialize<'de>,
