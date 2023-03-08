@@ -13,6 +13,19 @@ name = "aquarium"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "aquarium-lib",
+ "aquarium-macro",
+ "clap",
+ "serde",
+ "tokio",
+ "toml",
+]
+
+[[package]]
+name = "aquarium-lib"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
  "async-trait",
  "base64",
  "clap",
@@ -21,7 +34,14 @@ dependencies = [
  "serde",
  "serde_json",
  "tokio",
- "toml",
+]
+
+[[package]]
+name = "aquarium-macro"
+version = "0.1.0"
+dependencies = [
+ "quote",
+ "syn",
 ]
 
 [[package]]

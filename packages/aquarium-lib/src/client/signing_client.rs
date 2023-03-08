@@ -9,9 +9,9 @@ use cosmrs::{
     AccountId, Any, Coin, Denom,
 };
 use serde::Serialize;
-use serde_json::json;
+use serde_json::{json, Value};
 
-use crate::config::{Account, Network};
+use crate::{account::AccountWithInfo, config::Network};
 
 use super::{query_client::Querier, QueryClient};
 
@@ -65,17 +65,12 @@ pub trait Executor {
 
 pub struct SigningClient {
     network: Network,
-    account: Account,
-    derivation_path: String,
+    account: AccountWithInfo,
 }
 
 impl SigningClient {
-    pub fn new(network: Network, account: Account, derivation_path: String) -> Self {
-        Self {
-            network,
-            account,
-            derivation_path,
-        }
+    pub fn new(network: Network, account: AccountWithInfo) -> Self {
+        Self { network, account }
     }
 
     pub fn into_query(self) -> QueryClient {
@@ -103,7 +98,7 @@ impl SigningClient {
         );
 
         let tx_raw = {
-            let (pk, sk) = self.account.get_keypair(&self.derivation_path)?;
+            let (pk, sk) = self.account.get_keypair()?;
 
             let auth_info = SignerInfo {
                 public_key: Some(pk.into()),
@@ -168,10 +163,13 @@ impl Querier for SigningClient {
         Req: Serialize + ?Sized + Sync,
         Res: for<'de> serde::Deserialize<'de>,
     {
-        let encoded = STANDARD.encode(serde_json::to_vec(message)?);
-        let path = format!("cosmwasm/wasm/v1/contract/{address}/smart/{encoded}",);
-        let res = self.network.get(path).await?;
-        Ok(serde_json::from_value(res["data"].clone())?)
+        let query_client = QueryClient::new(self.network.clone());
+        query_client.query(address, message).await
+    }
+
+    async fn wait_for_transaction(&self, tx_hash: String) -> Result<Value> {
+        let query_client = QueryClient::new(self.network.clone());
+        query_client.wait_for_transaction(tx_hash).await
     }
 }
 
@@ -189,8 +187,7 @@ impl Executor for SigningClient {
     {
         let encoded = STANDARD.encode(serde_json::to_vec(message)?);
         let msg = MsgExecuteContract {
-            sender: AccountId::from_str(&self.account.address)
-                .map_err(|_| anyhow::anyhow!("Invalid sender address: {}", self.account.address))?,
+            sender: self.account.address.clone(),
             contract: AccountId::from_str(&address)
                 .map_err(|_| anyhow::anyhow!("Invalid contract address"))?,
             msg: encoded.into_bytes(),
@@ -202,8 +199,7 @@ impl Executor for SigningClient {
 
     async fn store_code(&self, bytecode: Vec<u8>, memo: Option<String>) -> Result<String> {
         let msg = MsgStoreCode {
-            sender: AccountId::from_str(&self.account.address)
-                .map_err(|_| anyhow::anyhow!("Invalid sender address: {}", self.account.address))?,
+            sender: self.account.address.clone(),
             wasm_byte_code: bytecode,
             instantiate_permission: None,
         };
@@ -226,8 +222,7 @@ impl Executor for SigningClient {
         let encoded = STANDARD.encode(serde_json::to_vec(msg)?);
 
         let msg = MsgInstantiateContract {
-            sender: AccountId::from_str(&self.account.address)
-                .map_err(|_| anyhow::anyhow!("Invalid sender address: {}", self.account.address))?,
+            sender: self.account.address.clone(),
             msg: encoded.into_bytes(),
             code_id,
             admin: admin
@@ -255,8 +250,7 @@ impl Executor for SigningClient {
         let encoded = STANDARD.encode(serde_json::to_vec(msg)?);
 
         let msg = MsgMigrateContract {
-            sender: AccountId::from_str(&self.account.address)
-                .map_err(|_| anyhow::anyhow!("Invalid sender address: {}", self.account.address))?,
+            sender: self.account.address.clone(),
             contract: AccountId::from_str(&address)
                 .map_err(|_| anyhow::anyhow!("Invalid contract address"))?,
             code_id,
@@ -283,7 +277,7 @@ impl Executor for SigningClient {
 
         let (acc, sequence) = self
             .network
-            .account_sequence_numbers(self.account.address.clone())
+            .account_sequence_numbers(self.account.address.to_string())
             .await?;
 
         let estimated_gas = self
@@ -300,7 +294,7 @@ impl Executor for SigningClient {
         );
 
         let tx_raw = {
-            let (pk, sk) = self.account.get_keypair(&self.derivation_path)?;
+            let (pk, sk) = self.account.get_keypair()?;
             let auth_info = SignerInfo::single_direct(Some(pk), sequence).auth_info(gas_fee);
 
             let sign_doc = SignDoc::new(

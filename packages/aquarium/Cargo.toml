@@ -1,0 +1,18 @@
+[package]
+name = "aquarium"
+version = "0.1.0"
+authors = ["Amit Prasad <mail@amitprasad.dev>"]
+edition = "2021"
+
+[[bin]]
+name = "aquarium"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1"
+clap = { version = "4.1.8", features = ["derive"] }
+tokio = { version = "1.26.0", features = ["full"] }
+serde = { version = "1", features = ["derive"] }
+toml = { version = "0.7.2", features = ["preserve_order"] }
+aquarium-lib = { path = "../aquarium-lib" }
+aquarium-macro = { path = "../aquarium-macro" }

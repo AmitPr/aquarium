@@ -1,9 +1,12 @@
+mod cli;
+mod project;
+
 use anyhow::Result;
 
-use aquarium::Project;
+use project::Project;
 
-use aquarium::cli::args::Commands;
-use aquarium::cli::Cli;
+use cli::args::Commands;
+use cli::Cli;
 use clap::Parser;
 
 #[tokio::main]
