@@ -65,6 +65,10 @@ impl Project {
             .parent()
             .ok_or(anyhow::anyhow!("Could not find project root"))?
             .to_path_buf();
+
+        // run dotenv config in project root
+        dotenv::from_path(root.join(".env")).ok();
+        
         let config = Config::load(config_file)?;
         Ok(Self { root, config })
     }
