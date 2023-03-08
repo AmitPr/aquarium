@@ -35,6 +35,9 @@ impl Project {
             std::fs::create_dir_all(&root)?;
         }
 
+        // run dotenv config in project root
+        dotenv::from_path(root.join(".env")).ok();
+
         let mut config = Config::default();
         config.project = name;
 

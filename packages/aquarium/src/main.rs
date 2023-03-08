@@ -7,11 +7,9 @@ use aquarium::internal::Project;
 use aquarium::internal::args::{Commands, RunTaskArgs, TaskCommands};
 use aquarium::internal::Cli;
 use clap::Parser;
-use dotenv::dotenv;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    dotenv().ok();
     let cli = Cli::parse();
     match cli.command {
         Commands::Init { name, dir } => {
