@@ -11,17 +11,18 @@ pub struct ContractRefs {
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct NetworkSpecificRefs {
-    pub categories: HashMap<String, Category>,
+    #[serde(flatten)]
+    pub contracts: HashMap<String, Contract>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
-pub struct Category {
+pub struct Contract {
     pub code_ids: Vec<u64>,
-    pub contracts: Vec<Contract>,
+    pub instances: Vec<ContractInstance>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Contract {
+pub struct ContractInstance {
     pub code_id: u64,
     pub address: String,
     #[serde(flatten)]
@@ -44,20 +45,34 @@ impl ContractRefs {
     pub fn save(&self, path: PathBuf) -> Result<()> {
         Ok(std::fs::write(
             path,
-            serde_json::to_string(self).map_err(|e| anyhow::anyhow!(e))?,
+            serde_json::to_string_pretty(self).map_err(|e| anyhow::anyhow!(e))?,
         )?)
     }
 }
 
 impl NetworkSpecificRefs {
-    pub fn get_contract(&mut self, category: &str, address: &str) -> Option<&mut Contract> {
-        self.categories
-            .get_mut(category)
-            .and_then(|category| {
-                category
-                    .contracts
-                    .iter_mut()
-                    .find(|contract| contract.address == address)
-            })
+    pub fn get_contract_instance(&mut self, contract: &str, address: &str) -> Option<&mut ContractInstance> {
+        self.contracts.get_mut(contract).and_then(|category| {
+            category
+                .instances
+                .iter_mut()
+                .find(|instance| instance.address == address)
+        })
+    }
+
+    pub fn add_contract_instance(&mut self, contract: &str, instance: ContractInstance) {
+        let category = self.contracts.entry(contract.to_string()).or_default();
+        category.code_ids.push(instance.code_id);
+        category.instances.push(instance);
+    }
+}
+
+impl ContractInstance {
+    pub fn new(code_id: u64, address: String) -> Self {
+        Self {
+            code_id,
+            address,
+            attrs: HashMap::new(),
+        }
     }
 }

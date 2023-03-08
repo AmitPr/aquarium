@@ -1,13 +1,14 @@
-use std::{collections::HashMap, path::PathBuf};
+use std::{collections::HashMap, path::PathBuf, process::Command};
 
 use anyhow::Result;
-use aquarium_lib::{
-    AccountWithInfo, ContractRefs, Env, Network, QueryClient, SerializableAccount, SigningClient,
-};
 use clap::Parser;
 use serde::{Deserialize, Serialize};
 
-use crate::cli::task::TaskArgs;
+use crate::{
+    account::{AccountWithInfo, SerializableAccount},
+    cli::task::TaskArgs,
+    ContractRefs, Env, Network, QueryClient, SigningClient,
+};
 
 pub const CONFIG_FILE_NAME: &str = "Aquarium.toml";
 
@@ -21,17 +22,34 @@ impl Project {
     #[allow(clippy::field_reassign_with_default)]
     pub fn init(name: String, dir: Option<PathBuf>) -> Result<Self> {
         let root = dir.unwrap_or(std::env::current_dir()?.join(name.clone()));
-        // make sure the project root is empty
-        if root.exists() && (root.is_file() || root.read_dir()?.next().is_some()) {
-            return Err(anyhow::anyhow!("Project root already exists"));
+        if root.exists() {
+            if root.is_file() {
+                return Err(anyhow::anyhow!("Project root exists as file"));
+            } else {
+                let config_file = root.join(CONFIG_FILE_NAME);
+                if config_file.exists() {
+                    return Err(anyhow::anyhow!("Project already exists"));
+                }
+            }
+        } else {
+            std::fs::create_dir_all(&root)?;
         }
-        std::fs::create_dir_all(&root)?;
 
         let mut config = Config::default();
         config.project = name;
 
+        let scripts_dir = root.join(config.scripts_path.clone());
+        std::fs::create_dir_all(&scripts_dir)?;
+        Command::new("cargo")
+            .arg("init")
+            .arg("--name scripts")
+            .arg("--bin")
+            .current_dir(&scripts_dir)
+            .output()?;
+
         let project = Self { root, config };
         project.save()?;
+
         Ok(project)
     }
 
@@ -123,6 +141,7 @@ impl Default for Project {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
     pub project: String,
+    pub scripts_path: String,
     pub hd_path: String,
     pub default_network: Option<String>,
     pub networks: HashMap<String, Network>,
@@ -184,6 +203,7 @@ impl Default for Config {
             accounts: HashMap::new(),
             hd_path: "m/44'/118'/0'/0/0".to_string(),
             default_network: Some("devnet".to_string()),
+            scripts_path: "scripts".to_string(),
         }
     }
 }

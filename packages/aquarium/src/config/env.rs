@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use crate::{ContractRefs, QueryClient, SigningClient, refs::NetworkSpecificRefs};
+use crate::{ContractRefs, NetworkSpecificRefs, QueryClient, SigningClient};
 
 pub struct Env {
     pub network: String,
@@ -28,8 +28,10 @@ impl Env {
     }
 
     pub fn save_refs(&self) -> Result<(), anyhow::Error> {
-        let mut crefs = ContractRefs::load(self.refs_path.clone())?;
-        crefs.networks.insert(self.network.clone(), self.refs.clone());
+        let mut crefs = ContractRefs::load_or_default(self.refs_path.clone())?;
+        crefs
+            .networks
+            .insert(self.network.clone(), self.refs.clone());
         crefs.save(self.refs_path.clone())
     }
 }

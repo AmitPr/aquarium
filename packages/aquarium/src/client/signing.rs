@@ -11,9 +11,7 @@ use cosmrs::{
 use serde::Serialize;
 use serde_json::{json, Value};
 
-use crate::{account::AccountWithInfo, config::Network};
-
-use super::{query_client::Querier, QueryClient};
+use crate::{account::AccountWithInfo, Network, Querier, QueryClient};
 
 pub const TIMEOUT_BLOCK_AMOUNT: u32 = 100;
 

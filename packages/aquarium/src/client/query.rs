@@ -5,9 +5,7 @@ use serde::Serialize;
 use anyhow::Result;
 use serde_json::Value;
 
-use crate::{account::AccountWithInfo, config::Network};
-
-use super::SigningClient;
+use crate::{account::AccountWithInfo, Network, SigningClient};
 
 #[async_trait]
 pub trait Querier {

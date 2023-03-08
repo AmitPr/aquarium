@@ -16,8 +16,16 @@ pub enum Commands {
         #[clap(name = "dir", long, short)]
         dir: Option<String>,
     },
+    #[clap(name = "task", about = "Run tasks/scripts")]
+    Task(RunTaskArgs),
     #[clap(name = "contract", about = "Manage contracts")]
     Contract(ContractArgs),
+}
+
+#[derive(Args, Debug, Clone)]
+pub struct RunTaskArgs {
+    #[clap(subcommand)]
+    pub command: TaskCommands,
 }
 
 #[derive(Args, Debug, Clone)]
@@ -30,4 +38,12 @@ pub struct ContractArgs {
 pub enum ContractCommands {
     #[clap(name = "new", about = "Create a new contract")]
     List {},
+}
+
+#[derive(Subcommand, Debug, Clone)]
+pub enum TaskCommands {
+    #[clap(name = "list", about = "List all tasks")]
+    List {},
+    #[clap(name = "run", about = "Run a task")]
+    Run { name: String },
 }
