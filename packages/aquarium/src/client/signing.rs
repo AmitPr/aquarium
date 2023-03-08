@@ -152,6 +152,10 @@ impl SigningClient {
 
         Ok(gas)
     }
+
+    pub fn get_account(&self) -> &AccountWithInfo {
+        &self.account
+    }
 }
 
 #[async_trait]
