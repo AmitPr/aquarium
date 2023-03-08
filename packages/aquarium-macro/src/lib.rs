@@ -36,11 +36,12 @@ pub fn task(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let input_fn = input.sig.ident.clone();
 
     let output = quote! {
+        #input
+        
         fn main () -> ::aquarium::internal::AnyhowResult<()> {
             let body = async {
                 let proj = ::aquarium::internal::Project::load()?;
                 let mut env = proj.env()?;
-                #input
                 #input_fn(&mut env).await;
                 env.save_refs()?;
                 Ok(())

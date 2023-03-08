@@ -7,13 +7,19 @@ use cosmrs::{
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct SerializableAccount {
-    pub mnemonic: String,
+#[serde(untagged)]
+pub enum SerializableAccount {
+    Mnemonic { mnemonic: String },
+    EnvMnemonic { env: String },
 }
 
 impl SerializableAccount {
     pub fn get_keypair(&self, derivation_path: impl AsRef<str>) -> Result<(PublicKey, SigningKey)> {
-        let seed = Mnemonic::new(self.mnemonic.clone(), Default::default())?.to_seed("");
+        let mnemonic = match self {
+            Self::Mnemonic { mnemonic } => mnemonic.clone(),
+            Self::EnvMnemonic { env } => std::env::var(env).map_err(|e| anyhow::anyhow!(e))?,
+        };
+        let seed = Mnemonic::new(mnemonic, Default::default())?.to_seed("");
         let sk = SigningKey::derive_from_path(&seed, &derivation_path.as_ref().parse()?)?;
         let pk = sk.public_key();
         Ok((pk, sk))

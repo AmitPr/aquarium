@@ -40,12 +40,15 @@ impl Project {
 
         let scripts_dir = root.join(config.scripts_path.clone());
         std::fs::create_dir_all(&scripts_dir)?;
-        Command::new("cargo")
+        let status = Command::new("cargo")
             .arg("init")
-            .arg("--name scripts")
+            .arg("--name")
+            .arg("scripts")
             .arg("--bin")
             .current_dir(&scripts_dir)
-            .output()?;
+            .status()?;
+
+        println!("Initializing scripts crate finished: {}", status);
 
         let project = Self { root, config };
         project.save()?;
