@@ -340,7 +340,7 @@ impl Executor for SigningClient {
 
         Ok(res["tx_response"]["txhash"]
             .as_str()
-            .ok_or(anyhow::anyhow!("Error parsing txhash"))?
+            .ok_or(anyhow::anyhow!("Error parsing txhash. Response: {res:#?}"))?
             .to_string())
     }
 }
