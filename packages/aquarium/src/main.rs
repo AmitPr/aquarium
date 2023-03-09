@@ -24,15 +24,16 @@ async fn main() -> Result<()> {
 
 async fn run_task(args: RunTaskArgs) -> Result<()> {
     match args.command {
-        TaskCommands::List {  } => {
+        TaskCommands::List {} => {
             let project = Project::load()?;
             let manifest = Command::new("cargo")
                 .arg("read-manifest")
                 .current_dir(&project.root.join(project.config.scripts_path.clone()))
                 .output()?;
             let manifest = serde_json::from_slice::<serde_json::Value>(&manifest.stdout)?;
-            let targets = manifest["targets"].as_array()
-                .map(|targets|{
+            let targets = manifest["targets"]
+                .as_array()
+                .map(|targets| {
                     targets
                         .iter()
                         .filter_map(|t| t["name"].as_str().map(|s| s.to_string()))
@@ -45,15 +46,16 @@ async fn run_task(args: RunTaskArgs) -> Result<()> {
             }
             Ok(())
         }
-        TaskCommands::Run { name } => {
+        TaskCommands::Run { name, mut trailing } => {
             let project = Project::load()?;
             let manifest = Command::new("cargo")
                 .arg("read-manifest")
                 .current_dir(&project.root.join(project.config.scripts_path.clone()))
                 .output()?;
             let manifest = serde_json::from_slice::<serde_json::Value>(&manifest.stdout)?;
-            let targets = manifest["targets"].as_array()
-                .map(|targets|{
+            let targets = manifest["targets"]
+                .as_array()
+                .map(|targets| {
                     targets
                         .iter()
                         .filter_map(|t| t["name"].as_str().map(|s| s.to_string()))
@@ -64,10 +66,14 @@ async fn run_task(args: RunTaskArgs) -> Result<()> {
                 println!("Task \"{}\" not found", name);
                 return Ok(());
             }
+            if !trailing.is_empty() {
+                trailing.insert(0, "--".to_string());
+            }
             let status = Command::new("cargo")
                 .arg("run")
                 .arg("--bin")
                 .arg(name)
+                .args(trailing)
                 .current_dir(&project.root.join(project.config.scripts_path.clone()))
                 .status()?;
             println!("Task completed with status {}", status);

@@ -45,5 +45,5 @@ pub enum TaskCommands {
     #[clap(name = "list", about = "List all tasks")]
     List {},
     #[clap(name = "run", about = "Run a task")]
-    Run { name: String },
+    Run { name: String, trailing: Vec<String> },
 }
