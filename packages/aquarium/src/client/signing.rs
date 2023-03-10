@@ -187,12 +187,11 @@ impl Executor for SigningClient {
     where
         Req: Serialize + ?Sized + Sync + Clone,
     {
-        let encoded = STANDARD.encode(serde_json::to_vec(message)?);
         let msg = MsgExecuteContract {
             sender: self.account.address.clone(),
             contract: AccountId::from_str(&address)
                 .map_err(|_| anyhow::anyhow!("Invalid contract address"))?,
-            msg: encoded.into_bytes(),
+            msg: serde_json::to_vec(message)?,
             funds,
         };
 
@@ -221,11 +220,9 @@ impl Executor for SigningClient {
     where
         Req: Serialize + ?Sized + Sync + Clone,
     {
-        let encoded = STANDARD.encode(serde_json::to_vec(msg)?);
-
         let msg = MsgInstantiateContract {
             sender: self.account.address.clone(),
-            msg: encoded.into_bytes(),
+            msg: serde_json::to_vec(msg)?,
             code_id,
             admin: admin
                 .map(|a| {
@@ -249,14 +246,12 @@ impl Executor for SigningClient {
     where
         Req: Serialize + ?Sized + Sync + Clone,
     {
-        let encoded = STANDARD.encode(serde_json::to_vec(msg)?);
-
         let msg = MsgMigrateContract {
             sender: self.account.address.clone(),
             contract: AccountId::from_str(&address)
                 .map_err(|_| anyhow::anyhow!("Invalid contract address"))?,
             code_id,
-            msg: encoded.into_bytes(),
+            msg: serde_json::to_vec(msg)?,
         };
 
         self.execute(vec![msg], memo).await
@@ -320,15 +315,14 @@ impl Executor for SigningClient {
             STANDARD.encode(tx_raw)
         };
 
+        let post_data = json!({
+            "tx_bytes": tx_raw,
+            "mode": "BROADCAST_MODE_SYNC",
+        });
+
         let res = self
             .network
-            .post(
-                "cosmos/tx/v1beta1/simulate",
-                &json!({
-                    "tx_bytes": tx_raw,
-                    "mode": "BROADCAST_MODE_SYNC",
-                }),
-            )
+            .post("cosmos/tx/v1beta1/txs", &post_data)
             .await?;
 
         if res["tx_response"]["code"]

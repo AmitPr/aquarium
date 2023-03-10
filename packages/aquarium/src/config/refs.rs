@@ -51,7 +51,11 @@ impl ContractRefs {
 }
 
 impl NetworkSpecificRefs {
-    pub fn get_contract_instance(&mut self, contract: &str, address: &str) -> Option<&mut ContractInstance> {
+    pub fn get_contract_instance(
+        &mut self,
+        contract: &str,
+        address: &str,
+    ) -> Option<&mut ContractInstance> {
         self.contracts.get_mut(contract).and_then(|category| {
             category
                 .instances
@@ -62,8 +66,18 @@ impl NetworkSpecificRefs {
 
     pub fn add_contract_instance(&mut self, contract: &str, instance: ContractInstance) {
         let category = self.contracts.entry(contract.to_string()).or_default();
-        category.code_ids.push(instance.code_id);
         category.instances.push(instance);
+    }
+
+    pub fn add_code_id(&mut self, contract: &str, code_id: u64) {
+        let category = self.contracts.entry(contract.to_string()).or_default();
+        category.code_ids.push(code_id);
+    }
+
+    pub fn get_code_ids(&mut self, contract: &str) -> Option<&mut Vec<u64>> {
+        self.contracts
+            .get_mut(contract)
+            .map(|category| &mut category.code_ids)
     }
 }
 

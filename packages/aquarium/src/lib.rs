@@ -10,6 +10,10 @@ pub mod internal {
     pub use crate::cli::*;
 }
 
+pub mod utils {
+    pub use crate::client::utils::*;
+}
+
 pub use {
     client::query::*,
     client::signing::*,
