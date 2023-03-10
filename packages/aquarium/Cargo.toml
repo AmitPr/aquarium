@@ -9,7 +9,7 @@ name = "aquarium"
 path = "src/lib.rs"
 
 [[bin]]
-name = "aqua"
+name = "aq"
 path = "src/main.rs"
 
 [dependencies]
