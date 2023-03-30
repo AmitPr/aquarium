@@ -19,7 +19,7 @@ name = "aq"
 path = "src/main.rs"
 
 [dependencies]
-aquarium-macro = { path = "../aquarium-macro" }
+aquarium-macro = "0.1.0"
 anyhow = "1"
 async-trait = "0.1.65"
 base64 = "0.21.0"
