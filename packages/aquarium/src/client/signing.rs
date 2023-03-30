@@ -6,12 +6,15 @@ use base64::{engine::general_purpose::STANDARD, Engine};
 use cosmrs::{
     cosmwasm::{MsgExecuteContract, MsgInstantiateContract, MsgMigrateContract, MsgStoreCode},
     tx::{mode_info::Single, Body, Fee, ModeInfo, Msg, SignDoc, SignMode, SignerInfo},
-    AccountId, Any, Coin, Denom,
+    AccountId, Any, Denom,
 };
+use cosmwasm_std::Coin;
 use serde::Serialize;
 use serde_json::{json, Value};
 
 use crate::{account::AccountWithInfo, Network, Querier, QueryClient};
+
+use super::utils::cosmwasm_coins_to_cosmrs_coins;
 
 pub const TIMEOUT_BLOCK_AMOUNT: u32 = 100;
 
@@ -192,7 +195,7 @@ impl Executor for SigningClient {
             contract: AccountId::from_str(&address)
                 .map_err(|_| anyhow::anyhow!("Invalid contract address"))?,
             msg: serde_json::to_vec(message)?,
-            funds,
+            funds: cosmwasm_coins_to_cosmrs_coins(funds),
         };
 
         self.execute(vec![msg], memo).await
@@ -230,7 +233,7 @@ impl Executor for SigningClient {
                 })
                 .transpose()?,
             label,
-            funds,
+            funds: cosmwasm_coins_to_cosmrs_coins(funds),
         };
 
         self.execute(vec![msg], memo).await
@@ -283,7 +286,7 @@ impl Executor for SigningClient {
 
         let gas_fee = u128::from((estimated_gas as f64 * self.network.gas_price).ceil() as u64);
         let gas_fee = Fee::from_amount_and_gas(
-            Coin {
+            cosmrs::Coin {
                 denom: Denom::from_str(self.network.gas_denom.as_str()).unwrap(),
                 amount: gas_fee,
             },

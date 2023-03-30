@@ -54,3 +54,11 @@ pub fn parse_instantiated_address(response: &Value) -> Result<String> {
         .ok_or_else(|| anyhow::anyhow!("Failed to parse contract address"))?;
     Ok(address)
 }
+
+pub(crate) fn cosmwasm_coins_to_cosmrs_coins(coin: Vec<cosmwasm_std::Coin>) -> Vec<cosmrs::Coin> {
+    coin.into_iter().map(cosmwasm_coin_to_cosmrs_coin).collect()
+}
+
+pub(crate) fn cosmwasm_coin_to_cosmrs_coin(coin: cosmwasm_std::Coin) -> cosmrs::Coin {
+    cosmrs::Coin::new(coin.amount.u128(), &coin.denom).unwrap()
+}
