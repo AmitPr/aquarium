@@ -1,7 +1,11 @@
 [package]
 name = "aquarium-macro"
 version = "0.1.0"
+authors = ["Amit Prasad <mail@amitprasad.dev>"]
 edition = "2021"
+description = "Macros for Aquarium"
+repository = "https://github.com/AmitPr/aquarium"
+license = "MIT"
 
 [lib]
 proc-macro = true

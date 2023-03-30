@@ -3,6 +3,12 @@ name = "aquarium"
 version = "0.1.0"
 authors = ["Amit Prasad <mail@amitprasad.dev>"]
 edition = "2021"
+description = "Aquarium is a CLI tool to interact with CosmWasm smart contracts, and write scripts to automate tasks."
+repository = "https://github.com/AmitPr/aquarium"
+license = "MIT"
+keywords = ["cosmwasm", "cli", "blockchain"]
+categories = ["cryptography::cryptocurrencies"]
+
 
 [lib]
 name = "aquarium"
