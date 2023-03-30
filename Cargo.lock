@@ -13,7 +13,7 @@ name = "aquarium"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "aquarium-macro 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "aquarium-macro",
  "async-trait",
  "base64",
  "clap",
@@ -29,16 +29,6 @@ dependencies = [
 [[package]]
 name = "aquarium-macro"
 version = "0.1.0"
-dependencies = [
- "quote",
- "syn",
-]
-
-[[package]]
-name = "aquarium-macro"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ae155c1f356f6db7a2bb42bf00d9548838d3921e4990bd40ce5c929f08562134"
 dependencies = [
  "quote",
  "syn",
