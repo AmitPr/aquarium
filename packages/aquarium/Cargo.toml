@@ -1,6 +1,6 @@
 [package]
 name = "aquarium"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Amit Prasad <mail@amitprasad.dev>"]
 edition = "2021"
 description = "Aquarium is a CLI tool to interact with CosmWasm smart contracts, and write scripts to automate tasks."

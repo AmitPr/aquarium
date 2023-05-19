@@ -72,6 +72,7 @@ async fn run_task(args: RunTaskArgs) -> Result<()> {
             let status = Command::new("cargo")
                 .arg("run")
                 .arg("--bin")
+                .arg("--quiet")
                 .arg(name)
                 .args(trailing)
                 .current_dir(&project.root.join(project.config.scripts_path.clone()))
